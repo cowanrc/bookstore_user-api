@@ -2,8 +2,8 @@ package user
 
 import (
 	"bookstore_user-api/domain/users"
-	"io/ioutil"
-	"log"
+	"bookstore_user-api/services"
+	"bookstore_user-api/utils/errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,19 +12,25 @@ import (
 func CreateUser(c *gin.Context) {
 	var user users.User
 
-	log.Printf("Printing user %v:", user)
-	bytes, err := ioutil.ReadAll(c.Request.Body)
+	if err := c.ShouldBindJSON(&user); err != nil {
 
-	if err != nil {
-		log.Println(err)
+		restErr := errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status, restErr)
+		return
 	}
 
-	log.Println(string(bytes))
-	c.String(http.StatusNotImplemented, "implement me!")
+	result, saveErr := services.CreateUser(user)
+	if saveErr != nil {
+		c.JSON(saveErr.Status, saveErr)
+		return
+	}
+
+	c.JSON(http.StatusCreated, result)
 
 }
 
 func GetUser(c *gin.Context) {
+
 	c.String(http.StatusNotImplemented, "implement me!")
 }
 
