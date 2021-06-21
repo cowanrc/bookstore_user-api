@@ -3,6 +3,7 @@ package services
 import (
 	"bookstore_user-api/domain/users"
 	"bookstore_user-api/utils/errors"
+	"fmt"
 )
 
 func GetUser(userId int64) (*users.User, *errors.RestErr) {
@@ -53,4 +54,14 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) 
 	}
 
 	return current, nil
+}
+
+func DeleteUser(userId int64) *errors.RestErr {
+	user := &users.User{Id: userId}
+	_, err := GetUser(user.Id)
+	if err != nil {
+		return errors.NewNotFoundError(fmt.Sprintf("User ID %d does not exist", userId))
+	}
+	return user.Delete()
+
 }
