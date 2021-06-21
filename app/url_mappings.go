@@ -3,14 +3,13 @@ package app
 import (
 	"bookstore_user-api/controllers/ping"
 	"bookstore_user-api/controllers/user"
-	"log"
 )
 
 func mapUrls() {
 	r.GET("/ping", ping.Ping)
 
-	r.GET("/users/:user_id", user.GetUser)
-	// r.GET("/users/search", users.SearchUser)
-	log.Printf("Calling Post")
 	r.POST("/users", user.CreateUser)
+	r.GET("/users/:userId", user.GetUser)
+	r.PUT("/users/:userId", user.UpdateUser)
+	r.PATCH("/users/:userId", user.UpdateUser)
 }
