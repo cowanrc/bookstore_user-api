@@ -1,6 +1,10 @@
 package app
 
-import "github.com/gin-gonic/gin"
+import (
+	"bookstore_user-api/logger"
+
+	"github.com/gin-gonic/gin"
+)
 
 var (
 	r = gin.Default()
@@ -8,6 +12,8 @@ var (
 
 func StartApplication() {
 	mapUrls()
+
+	logger.Info("about to start the application...")
 	r.Run(":8080")
 
 }
