@@ -14,6 +14,6 @@ func StartApplication() {
 	mapUrls()
 
 	logger.Info("about to start the application...")
-	r.Run(":8080")
+	r.Run(":8082")
 
 }
