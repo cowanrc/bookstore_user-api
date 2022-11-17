@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "env": {
+                "mysql_users_username": "root",
+                "mysql_users_password": "Superman101*",
+                "mysql_users_host": "127.0.0.1:3306",
+                "mysql_users_schema": "users_db"
+            }
+        }
+    ]
+}
+
+// export mysql_users_username="root"
+// export mysql_users_password="Superman101*"
+// export mysql_users_host="127.0.0.1:3306"
+// export mysql_users_schema="users_db"

@@ -3,58 +3,60 @@ package user
 import (
 	"bookstore_user-api/domain/users"
 	"bookstore_user-api/services"
-	"bookstore_user-api/utils/errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/cowanrc/bookstore_oauth-go/oauth"
+	"github.com/cowanrc/bookstore_utils-go/rest_errors"
+
 	"github.com/gin-gonic/gin"
 )
 
-func getUserId(userIdParam string) (int64, *errors.RestErr) {
+func getUserId(userIdParam string) (int64, rest_errors.RestErr) {
 	userId, userErr := strconv.ParseInt(userIdParam, 10, 64)
-
+	fmt.Println(userId)
 	if userErr != nil {
-		return 0, errors.NewBadRequestError("user id should be an integer")
+		return 0, rest_errors.NewBadRequestError("user id should be a number")
 	}
-
 	return userId, nil
 }
 
 func Create(c *gin.Context) {
 	var user users.User
-
 	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewBadRequestError("invalid json body")
-		c.JSON(restErr.Status, restErr)
+		restErr := rest_errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status(), restErr)
 		return
 	}
 
 	result, saveErr := services.UsersService.CreateUser(user)
 	if saveErr != nil {
-		c.JSON(saveErr.Status, saveErr)
+		c.JSON(saveErr.Status(), saveErr)
 		return
 	}
-
 	c.JSON(http.StatusCreated, result.Marshall(c.GetHeader("X-Public") == "true"))
-
 }
 
 func Get(c *gin.Context) {
 	if err := oauth.AuthenticateRequest(c.Request); err != nil {
-		c.JSON(err.Status, err)
+		c.JSON(err.Status(), err)
+		return
+	}
+
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status(), err)
 		return
 	}
 
 	userId, idErr := getUserId(c.Param("userId"))
 	if idErr != nil {
-		c.JSON(idErr.Status, idErr)
+		c.JSON(idErr.Status(), idErr)
 		return
 	}
-
-	user, getError := services.UsersService.GetUser(userId)
-	if getError != nil {
-		c.JSON(getError.Status, getError)
+	user, getErr := services.UsersService.GetUser(userId)
+	if getErr != nil {
+		c.JSON(getErr.Status(), getErr)
 		return
 	}
 
@@ -62,21 +64,20 @@ func Get(c *gin.Context) {
 		c.JSON(http.StatusOK, user.Marshall(false))
 		return
 	}
-
 	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func Update(c *gin.Context) {
 	userId, idErr := getUserId(c.Param("userId"))
 	if idErr != nil {
-		c.JSON(idErr.Status, idErr)
+		c.JSON(idErr.Status(), idErr)
 		return
 	}
 
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewBadRequestError("invalid json body")
-		c.JSON(restErr.Status, restErr)
+		restErr := rest_errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status(), restErr)
 		return
 	}
 
@@ -86,25 +87,23 @@ func Update(c *gin.Context) {
 
 	result, err := services.UsersService.UpdateUser(isPartial, user)
 	if err != nil {
-		c.JSON(err.Status, err)
+		c.JSON(err.Status(), err)
 		return
 	}
-
 	c.JSON(http.StatusOK, result.Marshall(c.GetHeader("X-Public") == "true"))
 }
 
 func Delete(c *gin.Context) {
 	userId, idErr := getUserId(c.Param("userId"))
 	if idErr != nil {
-		c.JSON(idErr.Status, idErr)
+		c.JSON(idErr.Status(), idErr)
 		return
 	}
 
 	if err := services.UsersService.DeleteUser(userId); err != nil {
-		c.JSON(err.Status, err)
+		c.JSON(err.Status(), err)
 		return
 	}
-
 	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
 }
 
@@ -113,26 +112,23 @@ func Search(c *gin.Context) {
 
 	users, err := services.UsersService.SearchUser(status)
 	if err != nil {
-		c.JSON(err.Status, err)
+		c.JSON(err.Status(), err)
 		return
 	}
-
 	c.JSON(http.StatusOK, users.Marshall(c.GetHeader("X-Public") == "true"))
 }
 
 func Login(c *gin.Context) {
 	var request users.LoginRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		restErr := errors.NewBadRequestError("invalid json body")
-		c.JSON(restErr.Status, restErr)
+		restErr := rest_errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status(), restErr)
 		return
 	}
-
 	user, err := services.UsersService.LoginUser(request)
 	if err != nil {
-		c.JSON(err.Status, err)
+		c.JSON(err.Status(), err)
 		return
 	}
-
 	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
 }
